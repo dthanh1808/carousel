@@ -1,98 +1,91 @@
 const carousel = document.querySelector(".carousel");
-const firstImg = carousel.querySelectorAll("img")[0];
-const arrowIcons = document.querySelectorAll(".wrapper i");
+const arrowBtns = document.querySelectorAll(".wrapper i");
+// Lấy tất cả ảnh để đếm số lượng slide
+const images = document.querySelectorAll(".carousel img");
 
-let isDragStart = false,
-    isDragging = false,
-    prevPageX,
-    prevScrollLeft,
-    positionDiff;
+let currentSlideIndex = 0;
+let autoInterval; // Chỉ còn biến cho interval
 
-const showHideIcons = () => {
-    let scrollWidth = carousel.scrollWidth - carousel.clientWidth;
-    arrowIcons[0].style.display = carousel.scrollLeft <= 0 ? "none" : "block";
-    arrowIcons[1].style.display = carousel.scrollLeft >= scrollWidth - 1 ? "none" : "block";
+// Số lượng slide thực tế trong HTML
+const totalSlides = images.length;
+// Chiều rộng một slide, bằng chiều rộng của carousel
+let slideWidth = 0; 
+
+
+// Cập nhật vị trí ảnh bằng cách cuộn ngang (scrollLeft)
+function updateCarousel() {
+    // Đảm bảo slideWidth được cập nhật trước khi cuộn
+    slideWidth = carousel.clientWidth;
+    // Cuộn carousel đến vị trí của slide hiện tại
+    carousel.scrollLeft = currentSlideIndex * slideWidth;
+    // Giữ cho cả hai mũi tên luôn hiển thị trong chế độ Looping
+    arrowBtns[0].style.display = "block";
+    arrowBtns[1].style.display = "block";
 }
 
-arrowIcons.forEach(icon => {
-    icon.addEventListener("click", () => {
-        const firstImgWidth = firstImg.clientWidth + 14;
+// Chuyển slide tiếp theo (Next)
+function nextSlide() { // Bỏ tham số check
+    if (currentSlideIndex < totalSlides - 1) {
+        currentSlideIndex++;
+    } else {
+        // Logic chuyển từ ảnh cuối về ảnh đầu (Looping)
+        currentSlideIndex = 0;
+    }
+    updateCarousel();
+}
 
-        carousel.scrollLeft += icon.id === "left" ? -firstImgWidth : firstImgWidth;
-        setTimeout(showHideIcons, 600);
+// Quay lại slide trước (Previous)
+function prevSlide() { // Bỏ tham số check
+    if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+    } else {
+        // Logic chuyển từ ảnh đầu về ảnh cuối (Looping)
+        currentSlideIndex = totalSlides - 1;
+    }
+    updateCarousel();
+}
+
+// --- Autoplay Logic (Chạy liên tục) ---
+
+// Bắt đầu tự động chạy
+function autoPlay() {
+    // Thiết lập interval để gọi nextSlide mỗi 3000ms.
+    autoInterval = setInterval(nextSlide, 3000);
+}
+
+
+// --- Event Listeners ---
+
+// Sự kiện cho nút điều hướng
+arrowBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        // 1. Dừng interval cũ
+        clearInterval(autoInterval); 
+        
+        // 2. Thực hiện chuyển slide
+        if (btn.id === "left") {
+            prevSlide();
+        } else {
+            nextSlide();
+        }
+        
+        // 3. Khởi động lại interval (đảm bảo bộ đếm được reset)
+        autoPlay(); 
     });
 });
 
-const autoSlide = () => {
-    if (!isDragStart) return;
-    isDragStart = false;
-    if (!isDragging) return;
-
-    const firstImgWidth = firstImg.clientWidth + 14;
-    const movedBy = prevScrollLeft - carousel.scrollLeft;
-    if (Math.abs(movedBy) < firstImgWidth / 3) {
-        carousel.scrollLeft = prevScrollLeft;
-    } else {
-        const targetScroll = movedBy > 0
-            ? Math.floor(carousel.scrollLeft / firstImgWidth) * firstImgWidth
-            : Math.ceil(carousel.scrollLeft / firstImgWidth) * firstImgWidth;
-
-        carousel.scrollLeft = targetScroll;
-    }
-    setTimeout(showHideIcons, 60);
-}
-
-const dragStart = (e) => {
-    prevPageX = e.pageX || e.touches[0].pageX;
-    prevScrollLeft = carousel.scrollLeft;
-    isDragStart = true;
-    carousel.classList.add("dragging"); 
-    isDragging = false; 
-}
-
-const dragging = (e) => {
-    if (!isDragStart) return;
-    e.preventDefault();
-    isDragging = true;
-    const currentPageX = e.pageX || e.touches[0].pageX;
-
-    positionDiff = currentPageX - prevPageX;
-
-    carousel.scrollLeft = prevScrollLeft - positionDiff;
-
-    showHideIcons();
-}
-
-const dragStop = () => {
-    if (!isDragStart) return;
-
-    if (isDragging) {
-        autoSlide(); 
-    } else {
-        carousel.classList.remove("dragging");
-        isDragStart = false; 
-    }
-
-    carousel.classList.remove("dragging"); 
-    isDragging = false;
-}
-
-carousel.addEventListener("mousedown", dragStart);
-carousel.addEventListener("touchstart", dragStart);
-
-document.addEventListener("mousemove", dragging);
-document.addEventListener("touchmove", dragging);
-
-document.addEventListener("mouseup", dragStop); 
-carousel.addEventListener("mouseleave", () => {
-    if (isDragStart) dragStop();
+// Cập nhật lại slideWidth và vị trí khi cửa sổ được thay đổi kích thước
+window.addEventListener("resize", () => {
+    slideWidth = carousel.clientWidth;
+    updateCarousel(); // Giữ slide hiện tại trong tầm nhìn
 });
-document.addEventListener("touchend", dragStop);
-
-window.addEventListener('load', showHideIcons);
-
-window.addEventListener('resize', showHideIcons);
 
 
 
-
+// Khởi tạo vị trí carousel và bắt đầu autoplay khi trang tải xong
+window.addEventListener('load', () => {
+    // Tính toán slideWidth ban đầu
+    slideWidth = carousel.clientWidth; 
+    updateCarousel(); 
+    autoPlay();
+});
