@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+body{
+    display: flex;
+    padding: 0 35px;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #d1c4e9, #f8bbd0);
+}
+.wrapper{
+    max-width: 1200px;
+    position: relative;
+}
+
+.wrapper i{
+   background: #fff;
+   width: 45px;
+   height: 45px;
+   text-align: center;
+   line-height: 45px; 
+   border-radius: 50%;
+   cursor: pointer;
+   font-size: 1.2rem;
+   position: absolute;
+   top: 50%;
+   transform: translateY(-50%);
+   z-index: 10; 
+   box-shadow: 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.wrapper i:first-child{
+    left: -23px;
+    display: none;
+}
+
+.wrapper i:last-child{
+    right: -23px;
+}
+.wrapper .carousel{
+    font-size: 0;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    scroll-behavior: smooth;
+}
+
+.carousel.dragging{
+    cursor: grab;
+    scroll-behavior: auto;
+}
+.carousel.dragging img{
+    pointer-events: none;
+}
+.carousel img{
+    height: 400px;
+    object-fit: cover;
+    margin-left: 14px;
+    width: calc(100% / 3);
+    transition: transform 0.3s ease-in-out; 
+}
+
+.carousel img:first-child{
+    margin-left: 0px;
+}
