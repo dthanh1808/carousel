@@ -1,91 +1,96 @@
+
+let currentIndex = 0;
+let autoInterval;
+let isTransitioning = false;
+let slideWidth = carousel.clientWidth;
+
 const carousel = document.querySelector(".carousel");
 const arrowBtns = document.querySelectorAll(".wrapper i");
-// Lấy tất cả ảnh để đếm số lượng slide
-const images = document.querySelectorAll(".carousel img");
-
-let currentSlideIndex = 0;
-let autoInterval; // Chỉ còn biến cho interval
-
-// Số lượng slide thực tế trong HTML
-const totalSlides = images.length;
-// Chiều rộng một slide, bằng chiều rộng của carousel
-let slideWidth = 0; 
+const images = Array.from(document.querySelectorAll(".carousel img"));
 
 
-// Cập nhật vị trí ảnh bằng cách cuộn ngang (scrollLeft)
-function updateCarousel() {
-    // Đảm bảo slideWidth được cập nhật trước khi cuộn
-    slideWidth = carousel.clientWidth;
-    // Cuộn carousel đến vị trí của slide hiện tại
-    carousel.scrollLeft = currentSlideIndex * slideWidth;
-    // Giữ cho cả hai mũi tên luôn hiển thị trong chế độ Looping
-    arrowBtns[0].style.display = "block";
-    arrowBtns[1].style.display = "block";
+
+// --- Clone slide đầu & cuối để smooth loop ---
+const firstClone = images[0].cloneNode(true); 
+const lastClone = images[images.length - 1].cloneNode(true); 
+carousel.appendChild(firstClone); 
+carousel.insertBefore(lastClone, images[0]); 
+const slides = Array.from(carousel.querySelectorAll("img"));
+const totalSlides = slides.length;
+
+// --- Cập nhật vị trí carousel ---
+function updateCarousel(smooth = true) {
+    // scroll đến slide hiện tại, có thể bật tắt smooth
+    carousel.scrollTo({
+        left: currentIndex * slideWidth,
+        behavior: smooth ? "smooth" : "auto"
+    });
 }
 
-// Chuyển slide tiếp theo (Next)
-function nextSlide() { // Bỏ tham số check
-    if (currentSlideIndex < totalSlides - 1) {
-        currentSlideIndex++;
-    } else {
-        // Logic chuyển từ ảnh cuối về ảnh đầu (Looping)
-        currentSlideIndex = 0;
-    }
-    updateCarousel();
+// --- Next slide ---
+function nextSlide() {
+    if (isTransitioning) return; // nếu đang chuyển thì không làm gì
+    isTransitioning = true;
+
+    currentIndex++; // tăng index
+    updateCarousel(); // cập nhật vị trí
+
+    setTimeout(() => {
+        // nếu tới clone cuối → reset về slide thật đầu
+        if (currentIndex === totalSlides - 1) {
+            currentIndex = 1; 
+            updateCarousel(false); 
+        }
+        isTransitioning = false; 
+    }, 500);
 }
 
-// Quay lại slide trước (Previous)
-function prevSlide() { // Bỏ tham số check
-    if (currentSlideIndex > 0) {
-        currentSlideIndex--;
-    } else {
-        // Logic chuyển từ ảnh đầu về ảnh cuối (Looping)
-        currentSlideIndex = totalSlides - 1;
-    }
-    updateCarousel();
+// --- Previous slide ---
+function prevSlide() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    currentIndex--; 
+    updateCarousel(); 
+
+    setTimeout(() => {
+       
+        if (currentIndex === 0) {
+            currentIndex = totalSlides - 2; 
+            updateCarousel(false); 
+        }
+        isTransitioning = false;
+    }, 500);
 }
 
-// --- Autoplay Logic (Chạy liên tục) ---
-
-// Bắt đầu tự động chạy
+// --- Autoplay ---
 function autoPlay() {
-    // Thiết lập interval để gọi nextSlide mỗi 3000ms.
-    autoInterval = setInterval(nextSlide, 3000);
+    autoInterval = setInterval(nextSlide, 3000); 
 }
 
-
-// --- Event Listeners ---
-
-// Sự kiện cho nút điều hướng
+// --- Event listeners ---
 arrowBtns.forEach(btn => {
     btn.addEventListener("click", () => {
-        // 1. Dừng interval cũ
-        clearInterval(autoInterval); 
-        
-        // 2. Thực hiện chuyển slide
+        clearInterval(autoInterval);
         if (btn.id === "left") {
-            prevSlide();
+            prevSlide(); 
         } else {
             nextSlide();
         }
-        
-        // 3. Khởi động lại interval (đảm bảo bộ đếm được reset)
         autoPlay(); 
     });
 });
 
-// Cập nhật lại slideWidth và vị trí khi cửa sổ được thay đổi kích thước
+// --- Resize window ---
 window.addEventListener("resize", () => {
     slideWidth = carousel.clientWidth;
-    updateCarousel(); // Giữ slide hiện tại trong tầm nhìn
+    updateCarousel(false); 
 });
 
-
-
-// Khởi tạo vị trí carousel và bắt đầu autoplay khi trang tải xong
-window.addEventListener('load', () => {
-    // Tính toán slideWidth ban đầu
-    slideWidth = carousel.clientWidth; 
-    updateCarousel(); 
-    autoPlay();
+// --- Khởi tạo ---
+window.addEventListener("load", () => {
+    slideWidth = carousel.clientWidth;
+    currentIndex = 1; 
+    updateCarousel(false); 
+    autoPlay(); 
 });

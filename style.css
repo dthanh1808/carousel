@@ -19,7 +19,7 @@ body {
 .wrapper {
     max-width: 900px;
     position: relative;
-    overflow: hidden; 
+    overflow: hidden;
     border-radius: 10px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
@@ -59,12 +59,11 @@ body {
 .wrapper .carousel {
     font-size: 0;
     cursor: grab;
-
-    display: flex; 
-    
+    display: flex;
     overflow: hidden;
     white-space: nowrap;
-    transition: none; 
+    
+    
 }
 
 .carousel.dragging {
@@ -82,7 +81,7 @@ body {
     object-fit: cover;
     object-position: center;
     width: 100%;
-    flex-shrink: 0; 
+    flex-shrink: 0;
     margin-left: 0;
-    transition: none; 
+    transition: none;
 }
