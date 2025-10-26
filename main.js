@@ -1,13 +1,11 @@
-let currentIndex = 0;
-let autoInterval;
-let isTransitioning = false;
-let slideWidth = carousel.clientWidth;
-
-
 const carousel = document.querySelector(".carousel");
 const arrowBtns = document.querySelectorAll(".wrapper i");
 const images = Array.from(document.querySelectorAll(".carousel img"));
 
+let currentIndex = 0;
+let autoInterval;
+let isTransitioning = false;
+let slideWidth = carousel.clientWidth;
 
 // --- Clone slide đầu & cuối để smooth loop ---
 const firstClone = images[0].cloneNode(true);
@@ -92,3 +90,4 @@ window.addEventListener("load", () => {
     updateCarousel(false);
     autoPlay();
 });
+
